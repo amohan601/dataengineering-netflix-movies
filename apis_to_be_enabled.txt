@@ -1,0 +1,43 @@
+Cloud Dataproc API
+Compute Engine API
+Cloud Run Admin API
+Analytics Hub API					
+Artifact Registry API					
+Backup for GKE API					
+BigQuery API					
+BigQuery Connection API					
+BigQuery Data Policy API					
+BigQuery Data Transfer API					
+BigQuery Migration API					
+BigQuery Reservation API					
+BigQuery Storage API					
+Cloud Autoscaling API					
+Cloud Dataplex API					
+Cloud Dataproc Control API PRIVATE					
+Cloud Datastore API					
+Cloud Deployment Manager V2 API					
+Cloud DNS API					
+Cloud Filestore API					
+Cloud Logging API					
+Cloud Monitoring API					
+Cloud OS Login API					
+Cloud Pub/Sub API					
+Cloud Resource Manager API					
+Cloud SQL					
+Cloud SQL Admin API					
+Cloud Storage					
+Cloud Storage API					
+Cloud Trace API					
+Container File System API					
+Container Registry API					
+Dataform API					
+Google Cloud APIs					
+Google Cloud Storage JSON API					
+IAM Service Account Credentials API					
+Identity and Access Management (IAM) API					
+Kubernetes Engine API					
+Network Connectivity API					
+Secret Manager API					
+Serverless VPC Access API					
+Service Management API					
+Service Usage API
