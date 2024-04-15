@@ -10,12 +10,12 @@ blocks:
   language: python
   name: extract_data
   retry_config: null
-  status: executed
+  status: failed
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: extract_data
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks:
@@ -32,7 +32,7 @@ blocks:
   upstream_blocks:
   - extract_data
   uuid: transform_data
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration: {}
   downstream_blocks: []
