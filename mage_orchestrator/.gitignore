@@ -12,3 +12,5 @@ logs/
 mage-ai.db
 mage_data/
 secrets/
+mage_orchestrator/gcp-creds.json
+*.json
