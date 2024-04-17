@@ -8,7 +8,7 @@ This project is about netflix movies data analysis. This project looks at the ne
 
 We will get movies data as a daily feed from an input source. We run orchestration through MageAI using an orchestrator pipeline. The orchestrator pipelien will perform ETL by loading the data from remote storage (extract), perform transformation of the data to make it compatible for downstream analysis(transform), and finally loading the transformed data to google cloud storage. The storage is partitoned by year and month.  The tranformed data will then need to be run through a spark transformation and will be transformed and processed to load the final data for visualization to GCP big query table. 
 
-TODO
+![Architecture diagram of components](images/architecture.png)
 
 
 # Low level design details
@@ -125,7 +125,21 @@ BIGQUERY_SCHEMA_NAME="netflixdata12344"
 
 ### Step 5 - View the visualization
 
-TODO
+#### Visualizatin part 1
+The below image shows three tiles. The first tile shows the total record count being processed. The second tile shows a pie chart where the most popular genres are listed based on the number of ratings across the movie titles for those genre. The next diagram shows a bar chart of the most watched movie titles for a given year and month based on the hours viewed field.
+
+![Architecture diagram of components](visualization/visualization_1.png)
+
+#### Visualizatin part 2
+The visualization show here on left side is tabular data of top movies based on ranking every month. The next tile is a bar chart showing the most rated movies based on the calculated rank.
+
+![Architecture diagram of components](visualization/visualization_2.png)
+
+#### Visualizatin part 3
+
+The visualization here shows a time series chart with a general trend of movie release over the years. It can be observed that there were more releases from 2017 onwards and after. The next is a stacked bar chart showing which genres are available globally. It can be noticed that most genres are not available globally. Finally a correlation between total votes gives by users and the rating itself is shows. This is an important chart to indicate the ranking we calcualated based on total votes and rating is highly correlated indicating that movies with most votes tend to have a higher rating and hence likely higher ranking. 
+
+![Architecture diagram of components](visualization/visualization_3.png)
 
 ### Step 6 - Tear down everything
 
