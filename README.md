@@ -18,13 +18,18 @@ The file is in CSV format with below columns and sample values. <br/>
 |---|---|---|---|---|---|---|---|---|
 | The Night Agent: Season 1 | Yes | 2023-03-23 | 812100000 | 7696.0 | 6.0 | ["Biography, Drama, History"] | "persian empire,empire,5th century b.c.,achaemenid empire,persia" | "The film follows headstrong Ginny who meets Sunny for an arranged marriage, but turns him down, and then shows how Sunny teams up with Ginny's mother to win her love." |
 
-1. Extraction job - Mage orchestrator is used for extraction. The extract_data.py file extracts data from a data source. In this project I have used a simple data file loaded and ready to use in a github location. The file can be viewed [here](https://raw.githubusercontent.com/amohan601/dataengineering-netflix-movies/main/total_netflix_2023.csv).
-2. Transformation job - Transformation included identifying the right schema for the data, cleaning up the genre column, handling null and empty values for different critical columns and so on. The transformer in mage that does this functionality is transform_data.py
-3. Loading the data - Mage orchestrator performs loading the data from CSV file after transformation into google cloud storage bucket under a folder called netflix_data_modified. 
+1. Extraction job - Mage orchestrator is used for extraction. The [extract_data.py](./mage_orchestrator/mage-netflix-movies/data_loaders/extract_data.py) file extracts data from a data source. In this project I have used a simple data file loaded and ready to use in a github location. The file can be viewed [here](https://raw.githubusercontent.com/amohan601/dataengineering-netflix-movies/main/total_netflix_2023.csv).
+
+2. Transformation job - Transformation included identifying the right schema for the data, cleaning up the genre column, handling null and empty values for different critical columns and so on. The transformer in mage that does this functionality is [transform_data.py](./mage_orchestrator/mage-netflix-movies/transformers/transform_data.py)
+
+3. Loading the data - Mage orchestrator performs loading the data from CSV file after transformation into google cloud storage bucket under a folder called netflix_data_modified. The file for loading the data to google cloud storage under a folder of the given bucket is  [load_data.py](./mage_orchestrator/mage-netflix-movies/data_exporters/load_data.py)
 
 4. Spark job to transform the final data - Once the pipeline completes execution, we need to run the spark job to transform the ready to prepare for visualization and then loading the prepared data to bigquery tables. For the purpose of this project spark is run using dataproc and requires a dataproc cluster in google cloud started and ready to run when a spark job is submitted.
+The file to perform spark job and load transformed data to big query table is [LoadToBigQuery.py](./scripts/LoadToBigQuery.py)
+
 5. Running the pipeline using trigger - To run the pipeline mage trigger has been used with a schedule of once a day. 
-6. Viewing the visualization - Visualization has been done in looker studio and details are attached in the steps below. 
+
+6. Viewing the visualization - Visualization has been done in looker studio and details are attached in the steps below. Report can be found [here](https://lookerstudio.google.com/embed/reporting/456d3484-5333-4250-9e59-8aa44363a3ac/page/p_rywtd6m5fd)
 
 # Steps to replicate the project
 
@@ -48,9 +53,11 @@ Folder structure explained
 4. Mage pipeline code is in mage_orchestrator folder
 
 
+
 ```
 cd dataengineering-netflix-movies
 ```
+
 
 ### Step 2 - Create google cloud resources
 Running the resource creation and set up script for various resources.
@@ -84,6 +91,14 @@ BIGQUERY_DATASET_NAME="netflixdata12344"
 ### Step 3 - Execute mage scripts to set up the orchestrator
 
 ##### Running mage locally as a container
+
+
+
+```
+cd mage_orchestrator
+```
+
+Copy the contents of your gcp credentials json file to the gcp-creds.json file in Mage folder. <b>Once finished cd back to root folder. </b>
 
 User should have docker available if running Mage setup in desktop as docker container.
 The script will naviagate to mage_orchestrator folderdownloaded from the github  and run and set up mage pipeline for this project. Once the container is up and running, the mage link can then be accessed as http://localhost:6789
