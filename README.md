@@ -29,7 +29,7 @@ The file to perform spark job and load transformed data to big query table is [L
 
 5. Running the pipeline using trigger - To run the pipeline mage trigger has been used with a schedule of once a day. 
 
-6. Viewing the visualization - Visualization has been done in looker studio and details are attached in the steps below. Report can be found [here](https://lookerstudio.google.com/s/k98SQftjoco)
+6. Viewing the visualization - Visualization has been done in looker studio and details are attached in the steps below. Report can be found [here](./visualization/Netflix_ratings_visualizations.pdf)
 
 # Steps to replicate the project
 
