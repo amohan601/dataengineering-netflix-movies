@@ -1,14 +1,15 @@
 # Netfix movie data analysis
 
-# Project description
+# Problem description
 
 This project is about netflix movies data analysis. This project looks at the netflix movies data and recommends good movies for the users. The recommendations for the movies are based on movie ratings and also on the number of votes made by other users. The recommendations also provide suggestions on top movies by genre. 
 
 # Project architecture details
 
-We will get movies data as a daily feed from an input source. We run orchestration through MageAI using an orchestrator pipeline. The orchestrator pipelien will perform ETL by loading the data from remote storage (extract), perform transformation of the data to make it compatible for downstream analysis(transform), and finally loading the transformed data to google cloud storage. The storage is partitoned by year and month.  The tranformed data will then need to be run through a spark transformation and will be transformed and processed to load the final data for visualization to GCP big query table. 
+We will get movies data as a daily feed from an input source. We run orchestration through MageAI using an orchestrator pipeline. The orchestrator pipeline will perform ETL by loading the data from remote storage (extract), perform transformation of the data to make it compatible for downstream analysis(transform), and finally loading the transformed data to google cloud storage. The storage in google cloud is partitoned by year and month.  The tranformed data will then be run through a spark transformation job and will be transformed and processed to load the final data for visualization to GCP big query table. <br/>
+We use terraform to create part of the cloud resources (exception being dataproc job) such as cloud storage and big query schema. We run orchestrator as a docker container and produce data to these cloud resources. 
 
-![Architecture diagram of components](images/architecture.png)
+![Architecture diagram of components](architecture/architecture.png)
 
 
 # Low level design details
@@ -18,16 +19,33 @@ The file is in CSV format with below columns and sample values. <br/>
 |---|---|---|---|---|---|---|---|---|
 | The Night Agent: Season 1 | Yes | 2023-03-23 | 812100000 | 7696.0 | 6.0 | ["Biography, Drama, History"] | "persian empire,empire,5th century b.c.,achaemenid empire,persia" | "The film follows headstrong Ginny who meets Sunny for an arranged marriage, but turns him down, and then shows how Sunny teams up with Ginny's mother to win her love." |
 
-1. Extraction job - Mage orchestrator is used for extraction. The [extract_data.py](./mage_orchestrator/mage-netflix-movies/data_loaders/extract_data.py) file extracts data from a data source. In this project I have used a simple data file loaded and ready to use in a github location. The file can be viewed [here](https://raw.githubusercontent.com/amohan601/dataengineering-netflix-movies/main/total_netflix_2023.csv).
+1. Extraction job - Mage orchestrator is used for extraction. The [extract_data.py](./mage_orchestrator/mage-netflix-movies/data_loaders/extract_data.py) file extracts data from a data source. In this project I have used a simple data file loaded and ready to use in a github location. The file can be viewed [here](https://raw.githubusercontent.com/amohan601/dataengineering-netflix-movies/main/total_netflix_2023.csv). 
 
 2. Transformation job - Transformation included identifying the right schema for the data, cleaning up the genre column, handling null and empty values for different critical columns and so on. The transformer in mage that does this functionality is [transform_data.py](./mage_orchestrator/mage-netflix-movies/transformers/transform_data.py)
 
-3. Loading the data - Mage orchestrator performs loading the data from CSV file after transformation into google cloud storage bucket under a folder called netflix_data_modified. The file for loading the data to google cloud storage under a folder of the given bucket is  [load_data.py](./mage_orchestrator/mage-netflix-movies/data_exporters/load_data.py)
+3. Loading the data - Mage orchestrator performs loading the data from CSV file after transformation into google cloud storage bucket under a folder called netflix_data_modified. The file for loading the data to google cloud storage under a folder of the given bucket is  [load_data.py](./mage_orchestrator/mage-netflix-movies/data_exporters/load_data.py) The data is loaded into cloud storage bucket with partitioning by year and month. 
+
+##### google cloud storage (partioned by date and month)
+![gcs](visualization/gcs_bucket_structure.png)
 
 4. Spark job to transform the final data - Once the pipeline completes execution, we need to run the spark job to transform the ready to prepare for visualization and then loading the prepared data to bigquery tables. For the purpose of this project spark is run using dataproc and requires a dataproc cluster in google cloud started and ready to run when a spark job is submitted.
-The file to perform spark job and load transformed data to big query table is [LoadToBigQuery.py](./scripts/LoadToBigQuery.py)
+The file to perform spark job and load transformed data to big query table is [LoadToBigQuery.py](./scripts/LoadToBigQuery.py). Spark job explodes the comma seperated genre types along with other relevant columns to a seperate table called <b><i>netflix_genre</i></b>. It also produces the netflix movies information along with a calculated rank (calculated by considering number of movie ratings and rating itself for a given year and month) into <b><i>netflix_movies</i></b>. In addition to showcase top titles data has been produced to <b><i>netflix_top_movies</i></b>
 
-5. Running the pipeline using trigger - To run the pipeline mage trigger has been used with a schedule of once a day. 
+##### Tables in bigquery schema
+
+![gcs](visualization/tables_bigquery.png)
+
+##### netflix_genre
+![netflix_genre](visualization/netflix_genre_bigquery.png)
+
+##### netflix_movies
+![netflix_movies](visualization/netflix_movies_bigquery.png)
+
+
+##### netflix_top_movies
+![netflix_movies](visualization/netflix_top_movies_bigquery.png)
+
+5. Running the pipeline using trigger - To run the pipeline mage trigger has been used with a schedule of once a day. Currently it is set up for an adhoc run. 
 
 6. Viewing the visualization - Visualization has been done in looker studio and details are attached in the steps below. Report can be found [here](./visualization/Netflix_ratings_visualizations.pdf)
 
@@ -143,18 +161,25 @@ BIGQUERY_SCHEMA_NAME="netflixdata12344"
 #### Visualizatin part 1
 The below image shows three tiles. The first tile shows the total record count being processed. The second tile shows a pie chart where the most popular genres are listed based on the number of ratings across the movie titles for those genre. The next diagram shows a bar chart of the most watched movie titles for a given year and month based on the hours viewed field.
 
-![Architecture diagram of components](visualization/visualization_1.png)
+![Visualization 1](visualization/visualization_1.png)
 
 #### Visualizatin part 2
-The visualization show here on left side is tabular data of top movies based on ranking every month. The next tile is a bar chart showing the most rated movies based on the calculated rank.
+The visualization show here on left side is tabular data of top movies based on ranking every month. The next tile is a bar chart showing the most rated movies based on the number of votes given by users.
 
-![Architecture diagram of components](visualization/visualization_2.png)
+![Visualization 2](visualization/visualization_2.png)
 
 #### Visualizatin part 3
 
-The visualization here shows a time series chart with a general trend of movie release over the years. It can be observed that there were more releases from 2017 onwards and after. The next is a stacked bar chart showing which genres are available globally. It can be noticed that most genres are not available globally. Finally a correlation between total votes gives by users and the rating itself is shows. This is an important chart to indicate the ranking we calcualated based on total votes and rating is highly correlated indicating that movies with most votes tend to have a higher rating and hence likely higher ranking. 
+The visualization here shows a time series chart with a general trend of movie release over the years. It can be observed that there were more releases from 2017 onwards and after. The next is a stacked bar chart showing which genres are available globally. It can be noticed that most genres are not available globally. Finally a correlation between total votes gives by users and the rating itself is shows. This is an important chart to indicate the ranking we calcualated based on total votes vs rating vs ranking is highly correlated indicating that movies with most votes vs tend to have a higher rating and hence higher ranking. 
 
-![Architecture diagram of components](visualization/visualization_3.png)
+![Visualization 3](visualization/visualization_3.png)
+
+
+#### Visualizatin part 4
+
+The final visualization shows Top 3 movie titles (top in terms of ranking). There are movies that are tied to same rank and hence multiple movies exist every month with title of top 3. The second chart below shows the specific movies ranked in order as 1, 2, 3 for each month. 
+
+![Visualization 4](visualization/visualization_4.png)
 
 ### Step 6 - Tear down everything
 
@@ -175,3 +200,12 @@ BIGQUERY_DATASET_NAME="netflixdata12344"
 ```
 
 
+### Future improvements
+
+1. Replace the file passed into the orchestrator with a URL to kaggle and make necessary changes in the extractor to load data from kaggle using token authentication
+
+2. Allow splitting the file into multiple and run in batches to showcase batch processing
+
+3. Move dataproc cluster to be created via terraform 
+
+4. Run spark job as a step in orchestrator
