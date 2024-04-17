@@ -35,16 +35,29 @@ df.createOrReplaceTempView('netflix_movies')
 
 #all netflix movies in the dataset
 df_netflix_movies = spark.sql("""
-select 
-
-    title,
-    availability,
-    number_of_ratings,
-    rating AS rating,
-    release_date,
-    hours_viewed                          
+SELECT 
+title , 
+availability ,
+release_date , 
+hours_viewed , 
+number_of_ratings , 
+rating , 
+year, 
+month,
+concat(year,'/',month) yearandmonth,
+rank
     from 
-    netflix_movies
+        (
+        SELECT *, 
+        YEAR(TO_DATE(release_date)) year, 
+        MONTH(TO_DATE(release_date)) month ,  
+        DENSE_RANK() OVER (
+        PARTITION BY 
+        YEAR(TO_DATE(release_date)), MONTH(TO_DATE(release_date)) 
+        ORDER BY number_of_ratings DESC, rating DESC) as rank
+        from netflix_movies 
+        )  
+        order by year DESC, month DESC, rank ASC
 """)
 
 df_netflix_movies.write.format('bigquery') \
@@ -53,50 +66,57 @@ df_netflix_movies.write.format('bigquery') \
     .save()
 
 
-#show top three titles by rank
-df_netflix_top_titles = spark.sql("""
-select 
-
-    title,
-    availability,
-    year,
-    month,
-    concat(year,'/',month) yearandmonth,                             
-    rank,
-    number_of_ratings,
-    rating AS rating,
-    release_date
-    
+df_netflix_top_movies = spark.sql("""
+SELECT 
+title , 
+concat(year,'/',month) yearandmonth,
+rank
     from 
         (
         SELECT *, 
-        YEAR(TO_DATE(release_date)) as year, 
-        MONTH(TO_DATE(release_date)) as month,  
+        YEAR(TO_DATE(release_date)) year, 
+        MONTH(TO_DATE(release_date)) month ,  
         DENSE_RANK() OVER (
         PARTITION BY 
-            YEAR(TO_DATE(release_date)), MONTH(TO_DATE(release_date)) 
-            
+        YEAR(TO_DATE(release_date)), MONTH(TO_DATE(release_date)) 
         ORDER BY number_of_ratings DESC, rating DESC) as rank
-        from netflix_movies
+        from netflix_movies 
         )  
-        order by year DESC, month DESC , rank ASC
+        where rank <= 3                       
 """)
 
-
-df_netflix_top_titles.write.format('bigquery') \
-    .option('table', bigquery_schema+'netflix_top_titles') \
+df_netflix_top_movies.write.format('bigquery') \
+    .option('table', bigquery_schema+'netflix_top_movies') \
     .mode(bigquerytable_writemode) \
     .save()
 
 
 #all netflix genres
 df_netflix_genres = spark.sql("""
-select 
-    title,
-    explode(split(genre, ',')) AS genre_type,
-    release_date
-    from
-    netflix_movies 
+SELECT 
+REPLACE(genre_type, "'", "") genre_type, 
+title ,  
+availability , 
+release_date ,  
+hours_viewed , 
+number_of_ratings ,  
+rating ,  
+year , 
+month , 
+concat(year,'/',month) yearandmonth
+from 
+(
+    SELECT explode(split(genre, ',')) AS genre_type, 
+    title , 
+    availability ,
+    release_date , 
+    hours_viewed , 
+    number_of_ratings , 
+    rating , 
+    YEAR(TO_DATE(release_date)) year, 
+    MONTH(TO_DATE(release_date)) month 
+    FROM netflix_movies
+)
 """)
 
 df_netflix_genres.write.format('bigquery') \
