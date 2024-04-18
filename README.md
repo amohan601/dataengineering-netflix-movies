@@ -116,7 +116,7 @@ BIGQUERY_DATASET_NAME="netflixdata12344"
 cd mage_orchestrator
 ```
 
-Copy the contents of your gcp credentials json file to the gcp-creds.json file in Mage folder. <b>Once finished cd back to root folder. </b>
+Copy the contents of your gcp credentials json file to the <b>gcp-creds.json</b> file in Mage folder. <b>Once finished cd back to root folder. </b>
 
 User should have docker available if running Mage setup in desktop as docker container.
 The script will naviagate to mage_orchestrator folderdownloaded from the github  and run and set up mage pipeline for this project. Once the container is up and running, the mage link can then be accessed as http://localhost:6789
@@ -125,8 +125,7 @@ Ensure to run the script from the root folder.
 ```
 PROJECT_ID="<path_to_gcp_project_id>"
 BUCKET_NAME="netflix-data-2023-01010101"
-GCP_CREDS="<path_to_gcp_credentials_json_file>"
-./scripts/start-mage-container.sh $PROJECT_ID $BUCKET_NAME $GCP_CREDS
+./scripts/start-mage-container.sh $PROJECT_ID $BUCKET_NAME
 ```
 
 ### Step 4 - Run the pipeline
@@ -134,6 +133,9 @@ GCP_CREDS="<path_to_gcp_credentials_json_file>"
 #### Run the pipeline script
 
 To replicate the steps manually run the pipeline once using the trigger option. No argument is required since by default the file is set in environment variable path for the docker container. Bucket name and Big query dataset name are also passed into docker contain when starting the container.
+
+To trigger the job in pipeline see below
+![pipeline](visualization/run_pipeline.png)
 
 #### Run the spark script for post transformation
 This step will run and execute spark transformation on the data in google cloud storage and load the data to bigquery. The default mode is to overwrite the data in bigquery tables every time the job runs, however an argument can be passed to the job to append the data when the job runs in batch mode to keep loading the data to bigquery.
@@ -202,10 +204,8 @@ BIGQUERY_DATASET_NAME="netflixdata12344"
 
 ### Future improvements
 
-1. Replace the file passed into the orchestrator with a URL to kaggle and make necessary changes in the extractor to load data from kaggle using token authentication
+1. Change the input source to be a cloud storage. Make changes in extractor to support loading from cloud storage.
 
-2. Allow splitting the file into multiple and run in batches to showcase batch processing
+2. Manage dataproc cluster creation via terraform 
 
-3. Move dataproc cluster to be created via terraform 
-
-4. Run spark job as a step in orchestrator
+3. Run spark job as a step in orchestrator

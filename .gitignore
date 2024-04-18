@@ -205,6 +205,6 @@ upload-data.py
 *__init__.py
 *.DS_Store
 terraform/*.tfstate
-
+gcp-creds.json
 
 
