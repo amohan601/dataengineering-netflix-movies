@@ -12,9 +12,11 @@ def load_data_from_api(*args, **kwargs):
     """
     Template for loading data from API
     """
-    input_url = os.environ.get('INPUT_URL')
-    #print(variable_value)
+    input_url = kwargs.get('INPUT_URL')
+    print(input_url)
+    #input_url = 'https://raw.githubusercontent.com/amohan601/dataengineering-netflix-movies/main/total_netflix_2023.csv'
     #url = kwargs['INPUT_URL']
+    #print(input_url)
     return pd.read_csv(input_url, sep=',')
 
 

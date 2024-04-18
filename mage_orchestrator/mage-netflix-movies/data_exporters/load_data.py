@@ -21,13 +21,15 @@ def export_data_to_google_cloud_storage(df: DataFrame, **kwargs) -> None:
     table_name = 'netflix_data_modified'
     print('table_name ',table_name)
     root_path = f'{bucket_name}/{table_name}'
+    print('root_path ',root_path)
     table = pa.Table.from_pandas(df)
     gcs = pa.fs.GcsFileSystem()
    
-
+    print('starting write to gcs')
     pq.write_to_dataset(
         table,
         root_path = root_path,
         partition_cols =  ['year','month'],
         filesystem = gcs
     )
+    print('completed loading data to gcs')

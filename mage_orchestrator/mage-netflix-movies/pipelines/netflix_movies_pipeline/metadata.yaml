@@ -70,6 +70,7 @@ spark_config: {}
 tags: []
 type: python
 uuid: netflix_movies_pipeline
-variables: {}
+variables:
+  INPUT_URL: REPLACE_THIS
 variables_dir: /home/src/mage_data/mage-netflix-movies
 widgets: []
